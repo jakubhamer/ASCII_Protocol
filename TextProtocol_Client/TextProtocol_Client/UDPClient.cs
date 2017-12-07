@@ -4,8 +4,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-public static class extensions
+public static class Extensions
 {
+    // Zwracanie wartoœci indeksu gdzie rozpoczyna siê zadana fraza.
     public static int IndexOfNth(this string str, string value, int nth = 1)
     {
         if (nth <= 0)
@@ -18,6 +19,8 @@ public static class extensions
         }
         return offset;
     }
+    // Znajac indeks rozpoczêcia siê danej frazy zwraca poszukiwany tekst, który znajduje siê po zadanej frazie.
+    //S³u¿y do szukania wartoœci pól w komunikacie.
     public static string FindingInfo(string type, string message)
     {
         string info = "";
@@ -25,7 +28,7 @@ public static class extensions
         string firstChar = "";
         int i = 1;
         int questionTypeSize = 4;
-        index = extensions.IndexOfNth(message, type + ": ", 1);
+        index = IndexOfNth(message, type + ": ", 1);
         firstChar = message.Substring(index + questionTypeSize, 1);
         while (firstChar != " ")
         {
@@ -35,7 +38,7 @@ public static class extensions
         }
         return info;
     }
-}
+} // End of class extensions
 
 class UDPClient
 {
@@ -46,15 +49,15 @@ class UDPClient
     public static void ID_Definition(UdpClient client, IPEndPoint ep) // Nadanie ID.
     {
         ID = IdDraw(20);
-        byte[] sendEndInfo = Encoding.ASCII.GetBytes("TI: " + DateTime.Now.ToString() + " SN: 0 ID: " + ID + " ST: IDRequest ");
+        byte[] sendEndInfo = Encoding.ASCII.GetBytes("TI: " + DateTime.Now.ToString() + " NS: 0 ID: " + ID + " ST: IDRequest ");
         client.Send(sendEndInfo, sendEndInfo.Length);
         byte[] receiveByteArray = client.Receive(ref ep);
         string receivedData = Encoding.ASCII.GetString(receiveByteArray, 0, receiveByteArray.Length);
-        sessionID = extensions.FindingInfo("ST", receivedData);
+        sessionID = Extensions.FindingInfo("ST", receivedData);
     }
     private static Random random = new Random((int)DateTime.Now.Ticks);
 
-    public static string RandomString(int length)
+    public static string RandomString(int length) // Funkcja potrzebna do losowanie znaków.
     {
         const string chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789";
         return new string(Enumerable.Repeat(chars, length)
@@ -74,23 +77,27 @@ class UDPClient
         }
     }
 
+    // Metody odpowiedzialne za wszystkie operacje, które mo¿e wykonywaæ klient.
+    // Ka¿da z nich pobiera od klienta liczby na których ma byæ wykonana operacja.
+    // A nastêpnie wysy³a kolejne wiadomoœci z odpowiednimi numerami sekw.
+    // tak, ¿e ostatnia wiadomoœæ ma NS = 0;
     public static void Multiplication(UdpClient client)
     {
         SeqN = 2;
         string[] message = new string[3];
-        message[0] = "TI: " + DateTime.Now.ToString() + " SN: " + SeqN + " ID: " + ID + " OP: Multiplication ";
+        message[0] = "TI: " + DateTime.Now.ToString() + " NS: " + SeqN + " ID: " + ID + " OP: Multiplication ";
         SeqN--;
         Console.Write("Write multiplicand & multiplier:");
         string multiplicand = Console.ReadLine();
         string multiplier = Console.ReadLine();
-        message[1] = "TI: " + DateTime.Now.ToString() + " SN: " + SeqN + " ID: " + ID + " N1: " + multiplicand + " ";
+        message[1] = "TI: " + DateTime.Now.ToString() + " NS: " + SeqN + " ID: " + ID + " N1: " + multiplicand + " ";
         SeqN--;
-        message[2] = "TI: " + DateTime.Now.ToString() + " SN: " + SeqN + " ID: " + ID + " N2: " + multiplier + " ";
+        message[2] = "TI: " + DateTime.Now.ToString() + " NS: " + SeqN + " ID: " + ID + " N2: " + multiplier + " ";
 
         for (int i = 0; i <= 2; i++)
         {
             byte[] sendEndInfo = Encoding.ASCII.GetBytes(message[i]);
-            client.Send(sendEndInfo, sendEndInfo.Length);
+            client.Send(sendEndInfo, sendEndInfo.Length); // Wysy³anie komunikatu.
         }
 
     }
@@ -98,19 +105,19 @@ class UDPClient
     {
         SeqN = 2;
         string[] message = new string[3];
-        message[0] = "TI: " + DateTime.Now.ToString() + " SN: " + SeqN + " ID: " + ID + " OP: Division ";
+        message[0] = "TI: " + DateTime.Now.ToString() + " NS: " + SeqN + " ID: " + ID + " OP: Division ";
         SeqN--;
         Console.Write("Write dividend & divisor:");
         string dividend = Console.ReadLine();
         string divisor = Console.ReadLine();
-        message[1] = "TI: " + DateTime.Now.ToString() + " SN: " + SeqN + " ID: " + ID + " N1: " + dividend + " ";
+        message[1] = "TI: " + DateTime.Now.ToString() + " NS: " + SeqN + " ID: " + ID + " N1: " + dividend + " ";
         SeqN--;
-        message[2] = "TI: " + DateTime.Now.ToString() + " SN: " + SeqN + " ID: " + ID + " N2: " + divisor + " ";
+        message[2] = "TI: " + DateTime.Now.ToString() + " NS: " + SeqN + " ID: " + ID + " N2: " + divisor + " ";
 
         for (int i = 0; i <= 2; i++)
         {
             byte[] sendEndInfo = Encoding.ASCII.GetBytes(message[i]);
-            client.Send(sendEndInfo, sendEndInfo.Length);
+            client.Send(sendEndInfo, sendEndInfo.Length); // Wysy³anie komunikatu.
         }
 
 
@@ -119,55 +126,55 @@ class UDPClient
     {
         SeqN = 2;
         string[] message = new string[3];
-        message[0] = "TI: " + DateTime.Now.ToString() + " SN: " + SeqN + " ID: " + ID + " OP: Addition ";
+        message[0] = "TI: " + DateTime.Now.ToString() + " NS: " + SeqN + " ID: " + ID + " OP: Addition ";
         SeqN--;
         Console.Write("Write two summands:");
         string summand1 = Console.ReadLine();
         string summand2 = Console.ReadLine();
-        message[1] = "TI: " + DateTime.Now.ToString() + " SN: " + SeqN + " ID: " + ID + " N1: " + summand1 + " ";
+        message[1] = "TI: " + DateTime.Now.ToString() + " NS: " + SeqN + " ID: " + ID + " N1: " + summand1 + " ";
         SeqN--;
-        message[2] = "TI: " + DateTime.Now.ToString() + " SN: " + SeqN + " ID: " + ID + " N2: " + summand2 + " ";
+        message[2] = "TI: " + DateTime.Now.ToString() + " NS: " + SeqN + " ID: " + ID + " N2: " + summand2 + " ";
 
         for (int i = 0; i <= 2; i++)
         {
             byte[] sendEndInfo = Encoding.ASCII.GetBytes(message[i]);
-            client.Send(sendEndInfo, sendEndInfo.Length);
+            client.Send(sendEndInfo, sendEndInfo.Length); // Wysy³anie komunikatu.
         }
     }
     public static void Subtraction(UdpClient client)
     {
         SeqN = 2;
         string[] message = new string[3];
-        message[0] = "TI: " + DateTime.Now.ToString() + " SN: " + SeqN + " ID: " + ID + " OP: Subtraction ";
+        message[0] = "TI: " + DateTime.Now.ToString() + " NS: " + SeqN + " ID: " + ID + " OP: Subtraction ";
         SeqN--;
         Console.Write("Write minuend & subtrahend:");
         string minuend = Console.ReadLine();
         string subtrahend = Console.ReadLine();
-        message[1] = "TI: " + DateTime.Now.ToString() + " SN: " + SeqN + " ID: " + ID + " N1: " + minuend + " ";
+        message[1] = "TI: " + DateTime.Now.ToString() + " NS: " + SeqN + " ID: " + ID + " N1: " + minuend + " ";
         SeqN--;
-        message[2] = "TI: " + DateTime.Now.ToString() + " SN: " + SeqN + " ID: " + ID + " N2: " + subtrahend + " ";
+        message[2] = "TI: " + DateTime.Now.ToString() + " NS: " + SeqN + " ID: " + ID + " N2: " + subtrahend + " ";
 
         for (int i = 0; i <= 2; i++)
         {
             byte[] sendEndInfo = Encoding.ASCII.GetBytes(message[i]);
-            client.Send(sendEndInfo, sendEndInfo.Length);
+            client.Send(sendEndInfo, sendEndInfo.Length); // Wysy³anie komunikatu.
         }
     }
     public static void Factorial(UdpClient client)
     {
         SeqN = 1;
         string[] message = new string[2];
-        message[0] = "TI: " + DateTime.Now.ToString() + " SN: " + SeqN + " ID: " + ID + " OP: Factorial ";
+        message[0] = "TI: " + DateTime.Now.ToString() + " NS: " + SeqN + " ID: " + ID + " OP: Factorial ";
         SeqN--;
         Console.Write("Write number for factorial:");
         string argument = Console.ReadLine();
-        message[1] = "TI: " + DateTime.Now.ToString() + " SN: " + SeqN + " ID: " + ID + " N1: " + argument + " ";
+        message[1] = "TI: " + DateTime.Now.ToString() + " NS: " + SeqN + " ID: " + ID + " N1: " + argument + " ";
         SeqN--;
 
         for (int i = 0; i <= 1; i++)
         {
             byte[] sendEndInfo = Encoding.ASCII.GetBytes(message[i]);
-            client.Send(sendEndInfo, sendEndInfo.Length);
+            client.Send(sendEndInfo, sendEndInfo.Length); // Wysy³anie komunikatu.
         }
 
     }
@@ -176,40 +183,37 @@ class UDPClient
         string message;
         Console.Write("Write ID of operations you would like to search for (\"your session ID\" for all operations): ");
         string ID = Console.ReadLine();
-        message = "TI: " + DateTime.Now.ToString() + " SN: 0 ID: " + ID + " OP: History ";
+        message = "TI: " + DateTime.Now.ToString() + " NS: 0 ID: " + ID + " OP: History ";
         byte[] sendEndInfo = Encoding.ASCII.GetBytes(message);
-        client.Send(sendEndInfo, sendEndInfo.Length);
+        client.Send(sendEndInfo, sendEndInfo.Length); // Wysy³anie komunikatu.
     }
-
-
 
     static void Main(string[] args)
     {
         Console.Write("Press any key to start");
         Console.ReadLine();
         Console.Clear();
-        UdpClient client = new UdpClient();
-        Console.WriteLine("Enter IP adrress you would like to send message: ");
-        string ipAdrress = "127.0.0.1";//Console.ReadLine();
-        Console.WriteLine("Enter port you would like to send message: ");
-        int port = 9333;//Int32.Parse(Console.ReadLine());
-        IPEndPoint ep = new IPEndPoint(IPAddress.Parse(ipAdrress), port); // endpoint where server is listening
-        client.Connect(ep);
+        UdpClient client = new UdpClient(); // Definicja nowego obietku klasy client.
+        //Console.WriteLine("Enter IP adrress you would like to send message: ");
+        string ipAdrress = "127.0.0.1"; // Ustawienie IP.
+        //Console.WriteLine("Enter port you would like to send message: ");
+        int port = 9333; // Przypisanie portu.
+        IPEndPoint ep = new IPEndPoint(IPAddress.Parse(ipAdrress), port); // Definicja struktury odpowiedzialnej za port i adres IP klienta.
+        client.Connect(ep); // "Po³¹czenie" z serwerem. Pe³ni to funkcjê przypisania do wszystkich metod nadania 
+                            //i odbioru wiadomoœci danych serwera, aby zawsze do niego by³y wysy³ane i od niego odbierane.
         string receivedData;
         byte[] receiveByteArray;
-
         Boolean done = false;
         ID_Definition(client, ep); // Nadanie ID.
         Console.Clear();
         while (!done)
         {
-
             {
                 Console.WriteLine("Your ID: " + sessionID);
                 Console.WriteLine("\nIDs from your search history: ");
                 for (int i=1;i<IDs.Count;i++)
                 {
-                    Console.WriteLine(IDs[i]);
+                    Console.WriteLine(IDs[i]); // Wypisywanie ID wszystkich operacji.
                 }
                 Console.WriteLine("\nChoose which operation you would like to do:");
                 Console.WriteLine("1 -> Multiplication");
@@ -225,7 +229,7 @@ class UDPClient
             {
                 choice = Convert.ToInt32(Console.ReadLine());
             }
-            catch (FormatException letterInsteadOfNumber)
+            catch (FormatException) // Sprawdzenie czy klient wybra³ poprawn¹ wartoœæ z menu.
             {
                 Console.WriteLine("Exception: wrong character instead of number. You must write number.");
                 Console.WriteLine("Try once again. Press any key to continue.");
@@ -233,7 +237,8 @@ class UDPClient
                 Console.Clear();
                 continue;
             }
-
+            // Switch case w którym wykonywane s¹ wszystkie operacje w zale¿noœci od wyboru klienta.
+            // Wpierw losowane jest ID operacji, a nastêpnie wykonywana odpowiednia metoda.
             switch (choice)
             {
                 case 1:
@@ -259,45 +264,41 @@ class UDPClient
                 case 6:
                     History(client);
                     break;
-                case 7:
+                case 7: // Opcja zakoñczenia pracy serwera. Klient wysy³a odpowiedni komunikat, który wy³¹cza serwer.
                     done = true;
-                    byte[] sendEndInfo = Encoding.ASCII.GetBytes("TI: " + DateTime.Now.ToString() + " SN: 0 ID: " + ID + " ST: Shutdowning server ");
+                    byte[] sendEndInfo = Encoding.ASCII.GetBytes("TI: " + DateTime.Now.ToString() + " NS: 0 ID: " + ID + " ST: Shutdowning server ");
                     client.Send(sendEndInfo, sendEndInfo.Length);
                     receiveByteArray = client.Receive(ref ep);
                     receivedData = Encoding.ASCII.GetString(receiveByteArray, 0, receiveByteArray.Length);
                     Console.WriteLine("Answer from server: " + receivedData);
                     return;
                 default:
-                    // sendEndInfo = Encoding.ASCII.GetBytes("TI: " + DateTime.Now.ToString() + " SN: 0 ID: " + ID + " OP: " );
-                    //client.Send(sendEndInfo, sendEndInfo.Length);
                     Console.WriteLine("Try once again. Press any key to continue.");
                     Console.ReadLine();
                     Console.Clear();
                     continue;
 
             }
-            receiveByteArray = client.Receive(ref ep);
+            receiveByteArray = client.Receive(ref ep); // Odbiór odpowiedzi z serwera.
             receivedData = Encoding.ASCII.GetString(receiveByteArray, 0, receiveByteArray.Length);
-            int SyncN = Convert.ToInt32(extensions.FindingInfo("SN", receivedData));
+            int SyncN = Convert.ToInt32(Extensions.FindingInfo("NS", receivedData)); //Wyci¹gnieciê z otrzymanego komunikatu numeru sekwencyjnego.
             string[] syncMessages = new string[SyncN+1];
             Console.WriteLine("Answer from server: " + receivedData);
-            if (SyncN != 0)
+            if (SyncN != 0) // Jeœli serwer przesy³a wiêcej ni¿ jeden¹ wiadomoœæ tj. numer sekwencyjny 
+                            //jest wiêkszy od zera to klient odbiera kolejne wiadomoœci póki nie natrafi na komunikat z numerem sekw. = 0
             {
                 do
                 {
                     receiveByteArray = client.Receive(ref ep);
                     receivedData = Encoding.ASCII.GetString(receiveByteArray, 0, receiveByteArray.Length);
-                    SyncN = Convert.ToInt32(extensions.FindingInfo("SN", receivedData));
+                    SyncN = Convert.ToInt32(Extensions.FindingInfo("NS", receivedData));
                     Console.WriteLine("Answer from server: " + receivedData);
 
                 } while (SyncN > 0);
-            }
-            
-                Console.WriteLine("Press any key to contiune...");
-
+            }      
+            Console.WriteLine("Press any key to contiune...");
             Console.ReadLine();
-
             Console.Clear();
-        } // end of while (!done)
+        }
     } // end of main()
-} // end of class Program
+} // end of class UDPCLient
